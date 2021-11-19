@@ -1,0 +1,27 @@
+name: Publish Custom Rules
+
+on:
+  push:
+    branches:
+      - 'main'        # matches only main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 15
+
+      - name: Install snyk-iac-rules
+        run: npm i -g snyk-iac-rules
+        
+      - name: Test Rules
+        run: |
+           RULES=( $(ls rules) )
+           for ELEMENT in ${RULES[@]}
+              do
+              snyk-iac-rules test --run test_$ELEMENT --explain notes
+              done
