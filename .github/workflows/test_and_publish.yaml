@@ -14,10 +14,12 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 15
-
+    
+     # Install SDK
       - name: Install snyk-iac-rules
         run: npm i -g snyk-iac-rules
-        
+      
+     # Test to ensure rules work
       - name: Test Rules
         run: |
            RULES=( $(ls rules) )
@@ -25,3 +27,41 @@ jobs:
               do
               snyk-iac-rules test --run test_$ELEMENT --explain notes
               done
+              
+     # Bundle up the rules
+      - name: Build Rules
+        run: snyk-iac-rules build
+
+     # Login to Docker Hub - Rules will be stored here
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+     # Publish rules to Docker Hub
+      - name: Publish rules
+        run: snyk-iac-rules push --registry $REGISTRY_URL bundle.tar.gz
+        env:
+          REGISTRY_URL: "${{ secrets.REGISTRY_URL }}:v1"
+
+     # Update Snyk to point to new rules  
+      - name: Update Snyk
+        run: |
+          curl --location --request PATCH 'https://api.snyk.io/v3/groups/$ORG_ID/settings/iac/?version=2021-11-03~beta' \
+          --header 'Content-Type: application/vnd.api+json' \
+          --header 'Authorization: token ${{ secrets.SNYK_TOKEN }}' \
+          --data-raw '{
+            "data": {
+                  "type": "iac_settings",
+                  "attributes": {
+                    "custom_rules": {
+                      "oci_registry_url": "https://registry-1.${{ secrets.REGISTRY_URL}}",
+                      "oci_registry_tag": "v1",
+                      "is_enabled": true
+                    }
+                }
+            }
+          }'
+        env:
+         ORG_ID: "${{ secrets.ORG_ID }}"
