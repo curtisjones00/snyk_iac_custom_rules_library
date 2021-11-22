@@ -32,6 +32,34 @@ jobs:
       - name: Build Rules
         run: snyk-iac-rules build
 
+     # Configure Versioning
+      - name: Bump version
+        uses: remorses/bump-version@js
+        with:
+          version_file: ./VERSION
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Get Version
+        id: version
+        run: |
+          echo ::set-output name=version_tag::$(cat ./VERSION)
+      - name: Push changes to master 
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          tags: true
+        env:
+          DEFAULT_BUMP: patch
+
+     # Add Release
+      - name: Tag & Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GH_TOKEN }}"
+          automatic_release_tag: ${{ steps.version.outputs.version_tag }}
+          prerelease: false
+          files: |
+            bundle.tar.gz     
      # Login to Docker Hub - Rules will be stored here
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -43,7 +71,7 @@ jobs:
       - name: Publish rules
         run: snyk-iac-rules push --registry $REGISTRY_URL bundle.tar.gz
         env:
-          REGISTRY_URL: "${{ secrets.REGISTRY_URL }}:v1"
+          REGISTRY_URL: "${{ secrets.REGISTRY_URL }}:${{ steps.version.outputs.version_tag }}"
 
      # Update Snyk to point to new rules  
       - name: Update Snyk
@@ -57,7 +85,7 @@ jobs:
                   "attributes": {
                     "custom_rules": {
                       "oci_registry_url": "https://registry-1.${{ secrets.REGISTRY_URL}}",
-                      "oci_registry_tag": "v1",
+                      "oci_registry_tag": "${{ steps.version.outputs.version_tag }}",
                       "is_enabled": true
                     }
                 }
