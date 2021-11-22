@@ -38,7 +38,7 @@ jobs:
         with:
           version_file: ./VERSION
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Get Version
         id: version
         run: |
@@ -46,7 +46,7 @@ jobs:
       - name: Push changes to master 
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_TOKEN }}
           tags: true
         env:
           DEFAULT_BUMP: patch
@@ -55,7 +55,7 @@ jobs:
       - name: Tag & Release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: "${{ secrets.GH_TOKEN }}"
           automatic_release_tag: ${{ steps.version.outputs.version_tag }}
           prerelease: false
           files: |
