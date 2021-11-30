@@ -9,7 +9,6 @@ deny[msg] {
 		"severity": "medium",
 		"issue": "Incorrect VM Size for Nodes",
 		"impact": "There could be performance Impacts",
-		"remediation": "",
 		"msg": sprintf("%s nodepool vmsize is not optimal for performance", [resource.name]),
 		"remediation": "We require all AKS cllusters to use ",
 		"references": [],

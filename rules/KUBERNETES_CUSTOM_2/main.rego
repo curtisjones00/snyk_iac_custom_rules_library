@@ -11,7 +11,6 @@ deny[msg] {
 		"severity": "critical",
 		"issue": "Container image is using latest tag",
 		"impact": "Incorrect image version could be deployed",
-		"remediation": "Apply tag",
 		"msg": sprintf("%s is using 'latest' tag", [input.spec.template.spec.containers[_].image]),
 		"remediation": "Add a specific tag to the image. Do not use 'latest'",
 		"references": [],
