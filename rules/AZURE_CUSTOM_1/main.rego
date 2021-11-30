@@ -10,7 +10,7 @@ deny[msg] {
 		"issue": "Incorrect VM Size for Nodes",
 		"impact": "There could be performance Impacts",
 		"msg": sprintf("%s nodepool vmsize is not optimal for performance", [resource.name]),
-		"remediation": "We require all AKS cllusters to use ",
+		"remediation": "We require all AKS clusters to use Standard_D2_v4 VMs ",
 		"references": [],
 	}
 }
