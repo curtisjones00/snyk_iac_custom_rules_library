@@ -12,6 +12,7 @@ deny[msg] {
 		"impact": "Incorrect image version could be deployed",
 		"remediation": "Apply tag",
 		"msg": sprintf("%s does not have tag", [input.spec.template.spec.containers[_].image]),
+		"remediation": "Add a specific image tag. Do not use 'latest'",
 		"references": [],
 	}
 }
